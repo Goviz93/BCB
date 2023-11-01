@@ -10,15 +10,17 @@ import os
 import random
 import re
 import logging
+from time import sleep
 from PIL import Image
 from bs4 import BeautifulSoup
 from datetime import datetime
 from dataclasses import dataclass
+from selenium.webdriver.common.by import By
 from selenium_Browser import automatic_Browser
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import Select
 
-
-logging.basicConfig(level=logging.INFO,  format='%(asctime)s [%(lineno)d]: %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(lineno)d]: %(message)s')
 logging.getLogger().setLevel(logging.INFO)
 
 
@@ -55,12 +57,11 @@ def _createImageFolder():
         os.mkdir(_folder)
         return os.path.abspath(_folder)
 
+
 def _randomNumber():
-    _numlist = random.sample(range(0,9),7)
+    _numlist = random.sample(range(0, 9), 7)
     _num = ''.join(str(i) for i in _numlist)
     return _num
-
-
 
 
 class BOT(automatic_Browser):
@@ -92,7 +93,7 @@ class BOT(automatic_Browser):
             SecondLastName="RODRIGUEZ",
             Name="NAYELI",
             Birthday="01/12/1990",
-            NroDoc= _randomNumber(),
+            NroDoc=_randomNumber(),
             Address="COTOCA LA ENCONADA",
             phone="77145212",
             email="Nay_123@gmail.com",
@@ -104,9 +105,7 @@ class BOT(automatic_Browser):
         )
         self.Token = None
         self.pattern = "(?<=nroDocumento)(.*)(?=_input)"
-        #self.workFlow()
-
-
+        # self.workFlow()
 
     def workFlow(self):
         self.openform1()
@@ -115,7 +114,6 @@ class BOT(automatic_Browser):
         self.getToken()
         self.updateXpath_dict()
         self.Fill_form2()
-
 
     def openform1(self):
         self.Bot_Browser.get(self.URLs.get('Form_1'))
@@ -130,13 +128,11 @@ class BOT(automatic_Browser):
     def waitform2(self):
         self.waitElementXPATH(self.xpathDict.get('waitForm2'))
 
-
     def getToken(self):
         soup = BeautifulSoup(self.Bot_Browser.page_source, 'lxml')
         _label = soup.find('label', {'id': 'persona_frmPrincipal:j_idt44'})
         _rawPattern = _label.attrs.get('for')
         self.Token = re.findall(self.pattern, _rawPattern)
-
 
     def updateXpath_dict(self):
         self.xpath_form2_dict = {
@@ -153,16 +149,20 @@ class BOT(automatic_Browser):
             'USD': ("//input[@id='persona_frmPrincipal:monto" + str(self.Token[0]) + "_input']"),
             'Gender': ("//div[@id='persona_frmPrincipal:genero" + str(self.Token[0]) + "']")
         }
+        self.ids_from2_dict = {
+            'Gender_focus': ("persona_frmPrincipal:genero" + str(self.Token[0]) + "_focus"),
+            'Gender_input': ("persona_frmPrincipal:genero" + str(self.Token[0]) + "_input"),
+            'Gender_label': ("persona_frmPrincipal:genero" + str(self.Token[0]) + "_label")
+        }
 
     def Fill_form2(self):
-
         _Boxes = self.getElements_CLASS("ui-float-label")
         logging.info('Boxes found')
 
         self.scrollDown()
         logging.info('scrolled down')
 
-        #Paterno:
+        # Paterno:
         _box_2 = self.waitElementXPATH(self.xpath_form2_dict.get('LastName'))
         logging.info('find LastName')
         _Boxes[2].click()
@@ -170,7 +170,7 @@ class BOT(automatic_Browser):
         _box_2.send_keys(self.customer.LastName)
         logging.info('write LastName')
 
-        #Materno:
+        # Materno:
         _box_3 = self.waitElementXPATH(self.xpath_form2_dict.get('SecondLastName'))
         logging.info('find SecondLastName')
         _Boxes[3].click()
@@ -178,7 +178,7 @@ class BOT(automatic_Browser):
         _box_3.send_keys(self.customer.SecondLastName)
         logging.info('write SecondLastName')
 
-        #Nombre:
+        # Nombre:
         _box_4 = self.waitElementXPATH(self.xpath_form2_dict.get('Name'))
         logging.info('find Name')
         _Boxes[4].click()
@@ -186,7 +186,7 @@ class BOT(automatic_Browser):
         _box_4.send_keys(self.customer.Name)
         logging.info('write Name')
 
-        #Nacimiento:
+        # Nacimiento:
         """
         _box_6 = self.waitElementXPATH(self.xpath_form2_dict.get('Birthday'))
         logging.info('find Birthday')
@@ -195,10 +195,21 @@ class BOT(automatic_Browser):
         logging.info('write Birthday')
         """
 
+        # Genero
+        gender = self.Bot_Browser.find_element(by=By.ID, value=self.ids_from2_dict.get('Gender_focus'))
+
+        if 'F' in self.customer.Gender:
+            gender.send_keys('F')
+        elif 'M' in self.customer.Gender:
+            gender.send_keys('M')
+        else:
+            gender.send_keys('O')
+
+
         self.scrollDown()
         logging.info('scroll down')
 
-        #Direccion:
+        # Direccion:
         _box_6 = self.waitElementXPATH(self.xpath_form2_dict.get('Address'))
         logging.info('find Address')
         _Boxes[6].click()
@@ -206,7 +217,7 @@ class BOT(automatic_Browser):
         _box_6.send_keys(self.customer.Address)
         logging.info('write Address')
 
-        #Celular:
+        # Celular:
         _box_7 = self.waitElementXPATH(self.xpath_form2_dict.get('phone'))
         logging.info('find phone')
         _Boxes[7].click()
@@ -214,7 +225,7 @@ class BOT(automatic_Browser):
         _box_7.send_keys(self.customer.phone)
         logging.info('write phone')
 
-        #email:
+        # email:
         _box_8 = self.waitElementXPATH(self.xpath_form2_dict.get('email'))
         logging.info('find email')
         _Boxes[8].click()
@@ -225,39 +236,41 @@ class BOT(automatic_Browser):
         self.scrollDown()
         logging.info('scroll down')
 
-        #Job:
+        # Job:
         _box_9 = self.waitElementXPATH(self.xpath_form2_dict.get('Job'))
         logging.info('find Job')
-        _Boxes[9].click()
-        logging.info('click Job')
         _box_9.send_keys(self.customer.Job)
         logging.info('write Job')
+        sleep(0.3)
+        options = self.getElements_XPATH('//li[@data-item-label]')
+        for o in options:
+            if o.accessible_name == self.customer.Job:
+                o.click()
 
         self.scrollDown()
 
-        #Source:
+        # Source:
         _box_10 = self.waitElementXPATH(self.xpath_form2_dict.get('Source'))
         logging.info('find Source')
-        #_Boxes[10].click()
+        # _Boxes[10].click()
         logging.info('click Source')
         _box_10.send_keys(self.customer.Source)
         logging.info('write Source')
         _box_10.send_keys(Keys.TAB)
         logging.info('write Source TAB')
 
-
         self.scrollDown()
         logging.info('scroll down')
 
-        #Destiny:
+        # Destiny:
         _box_11 = self.waitElementXPATH(self.xpath_form2_dict.get('Destiny'))
         logging.info('find Destiny')
-        #_Boxes[11].click()
+        # _Boxes[11].click()
         logging.info('click Destiny')
         _box_11.send_keys(self.customer.Destiny)
         logging.info('write Destiny')
 
-        #USD:
+        # USD:
         _box_12 = self.waitElementXPATH(self.xpath_form2_dict.get('USD'))
         logging.info('find USD')
         _Boxes[12].click()
@@ -267,16 +280,9 @@ class BOT(automatic_Browser):
 
         input('Finalizar?')
 
-
     def getElementScreenshot(self, web_element):
         _web_element = web_element
         _image = _web_element.screenshot_as_png
         _image_stream = io.BytesIO(_image)
         _image_Pil = Image.open(_image_stream)
         _image_Pil.save(_createImageFolder() + '/' + str(_timestamp()) + '.png')
-
-
-
-
-
-
