@@ -105,6 +105,18 @@ class BOT(automatic_Browser):
         )
         self.Token = None
         self.pattern = "(?<=nroDocumento)(.*)(?=_input)"
+        self.keys_dict = {
+            '0': Keys.NUMPAD0,
+            '1': Keys.NUMPAD1,
+            '2': Keys.NUMPAD2,
+            '3': Keys.NUMPAD3,
+            '4': Keys.NUMPAD4,
+            '5': Keys.NUMPAD5,
+            '6': Keys.NUMPAD6,
+            '7': Keys.NUMPAD7,
+            '8': Keys.NUMPAD8,
+            '9': Keys.NUMPAD9
+        }
         # self.workFlow()
 
     def workFlow(self):
@@ -139,7 +151,7 @@ class BOT(automatic_Browser):
             'LastName': ("//input[@id='persona_frmPrincipal:primerApellido" + str(self.Token[0]) + "']"),
             'SecondLastName': ("//input[@id='persona_frmPrincipal:segundoApellido" + str(self.Token[0]) + "']"),
             'Name': ("//input[@id='persona_frmPrincipal:nombre" + str(self.Token[0]) + "']"),
-            'Birthday': ("//input[@id='persona_frmPrincipal:calFecha" + str(self.Token[0]) + "']"),
+            'Birthday': ("//input[@id='persona_frmPrincipal:calFecha" + str(self.Token[0]) + "_input']"),
             'Address': ("//input[@id='persona_frmPrincipal:direccion" + str(self.Token[0]) + "']"),
             'phone': ("//input[@id='persona_frmPrincipal:celular" + str(self.Token[0]) + "_input']"),
             'email': ("//input[@id='persona_frmPrincipal:correro" + str(self.Token[0]) + "']"),
@@ -152,7 +164,8 @@ class BOT(automatic_Browser):
         self.ids_from2_dict = {
             'Gender_focus': ("persona_frmPrincipal:genero" + str(self.Token[0]) + "_focus"),
             'Gender_input': ("persona_frmPrincipal:genero" + str(self.Token[0]) + "_input"),
-            'Gender_label': ("persona_frmPrincipal:genero" + str(self.Token[0]) + "_label")
+            'Gender_label': ("persona_frmPrincipal:genero" + str(self.Token[0]) + "_label"),
+            'calendar': {'persona_frmPrincipal:calFecha' + str(self.Token[0])}
         }
 
     def Fill_form2(self):
@@ -187,13 +200,16 @@ class BOT(automatic_Browser):
         logging.info('write Name')
 
         # Nacimiento:
-        """
-        _box_6 = self.waitElementXPATH(self.xpath_form2_dict.get('Birthday'))
-        logging.info('find Birthday')
+
+        _Boxes[4].click()
+        logging.info('click Birthday')
         
-        _box_6.send_keys(self.customer.Birthday)
+        _box4 = self.waitElementXPATH(self.xpath_form2_dict.get('Birthday'))
         logging.info('write Birthday')
-        """
+        #TODO: Crear una funcion que realice el parsing de string a Key.NUMPAD numbers.
+        _rawBirthday = self.customer.Birthday.replace('/','')
+        for n in list(_rawBirthday):
+            _box4.send_keys(self.keys_dict.get(n))
 
         # Genero
         gender = self.Bot_Browser.find_element(by=By.ID, value=self.ids_from2_dict.get('Gender_focus'))
@@ -269,6 +285,9 @@ class BOT(automatic_Browser):
         logging.info('click Destiny')
         _box_11.send_keys(self.customer.Destiny)
         logging.info('write Destiny')
+
+        self.scrollDown()
+        logging.info('scroll down')
 
         # USD:
         _box_12 = self.waitElementXPATH(self.xpath_form2_dict.get('USD'))
