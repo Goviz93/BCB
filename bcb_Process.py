@@ -18,7 +18,8 @@ from dataclasses import dataclass
 from selenium.webdriver.common.by import By
 from selenium_Browser import automatic_Browser
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import Select
+from selenium.common.exceptions import StaleElementReferenceException
+
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(lineno)d]: %(message)s')
 logging.getLogger().setLevel(logging.INFO)
@@ -175,7 +176,8 @@ class BOT(automatic_Browser):
         self.scrollDown()
         logging.info('scrolled down')
 
-        # Paterno:
+
+    # Paterno:
         _box_2 = self.waitElementXPATH(self.xpath_form2_dict.get('LastName'))
         logging.info('find LastName')
         _Boxes[2].click()
@@ -183,7 +185,8 @@ class BOT(automatic_Browser):
         _box_2.send_keys(self.customer.LastName)
         logging.info('write LastName')
 
-        # Materno:
+
+     # Materno:
         _box_3 = self.waitElementXPATH(self.xpath_form2_dict.get('SecondLastName'))
         logging.info('find SecondLastName')
         _Boxes[3].click()
@@ -191,7 +194,8 @@ class BOT(automatic_Browser):
         _box_3.send_keys(self.customer.SecondLastName)
         logging.info('write SecondLastName')
 
-        # Nombre:
+
+     # Nombre:
         _box_4 = self.waitElementXPATH(self.xpath_form2_dict.get('Name'))
         logging.info('find Name')
         _Boxes[4].click()
@@ -199,19 +203,34 @@ class BOT(automatic_Browser):
         _box_4.send_keys(self.customer.Name)
         logging.info('write Name')
 
-        # Nacimiento:
 
-        _Boxes[4].click()
+    # Nacimiento:
+        _time = 2
+
+        _Boxes[5].click()
         logging.info('click Birthday')
         
-        _box4 = self.waitElementXPATH(self.xpath_form2_dict.get('Birthday'))
+        _box5 = self.waitElementXPATH(self.xpath_form2_dict.get('Birthday'))
         logging.info('write Birthday')
-        #TODO: Crear una funcion que realice el parsing de string a Key.NUMPAD numbers.
-        _rawBirthday = self.customer.Birthday.replace('/','')
-        for n in list(_rawBirthday):
-            _box4.send_keys(self.keys_dict.get(n))
 
-        # Genero
+        _box5.send_keys(Keys.ESCAPE)
+        sleep(0.1)
+        _box5.send_keys(Keys.SHIFT + Keys.HOME)
+        sleep(0.1)
+        _box5.send_keys(Keys.DELETE)
+        sleep(0.1)
+
+        _rawBirthday = self.customer.Birthday.replace('/','')
+        logging.info(f'--- Birthday -> {_rawBirthday}')
+        for n in list(_rawBirthday):
+            _box5.send_keys(self.keys_dict.get(n))
+            logging.info(f'--- Birthday -> {self.keys_dict.get(n)}')
+
+
+    # Genero
+        gender_click = self.waitElementXPATH(self.xpath_form2_dict.get('Gender'))
+        gender_click.click()
+        sleep(0.1)
         gender = self.Bot_Browser.find_element(by=By.ID, value=self.ids_from2_dict.get('Gender_focus'))
 
         if 'F' in self.customer.Gender:
@@ -220,76 +239,97 @@ class BOT(automatic_Browser):
             gender.send_keys('M')
         else:
             gender.send_keys('O')
+        sleep(0.2)
+        gender.send_keys(Keys.ENTER)
+        sleep(_time)
+
+
+
 
 
         self.scrollDown()
         logging.info('scroll down')
 
-        # Direccion:
+
+    # Direccion:
         _box_6 = self.waitElementXPATH(self.xpath_form2_dict.get('Address'))
         logging.info('find Address')
         _Boxes[6].click()
         logging.info('click Address')
         _box_6.send_keys(self.customer.Address)
         logging.info('write Address')
+        sleep(_time)
 
-        # Celular:
+
+    # Celular:
         _box_7 = self.waitElementXPATH(self.xpath_form2_dict.get('phone'))
         logging.info('find phone')
         _Boxes[7].click()
         logging.info('click phone')
         _box_7.send_keys(self.customer.phone)
         logging.info('write phone')
+        sleep(_time)
 
-        # email:
+    # email:
         _box_8 = self.waitElementXPATH(self.xpath_form2_dict.get('email'))
         logging.info('find email')
         _Boxes[8].click()
         logging.info('click email')
         _box_8.send_keys(self.customer.email)
         logging.info('write email')
+        sleep(_time)
+
 
         self.scrollDown()
         logging.info('scroll down')
 
-        # Job:
+
+    # Job:
         _box_9 = self.waitElementXPATH(self.xpath_form2_dict.get('Job'))
         logging.info('find Job')
         _box_9.send_keys(self.customer.Job)
         logging.info('write Job')
-        sleep(0.3)
+        sleep(0.2)
+        self.waitElementXPATH('//li[@data-item-label]')
         options = self.getElements_XPATH('//li[@data-item-label]')
         for o in options:
             if o.accessible_name == self.customer.Job:
                 o.click()
+        sleep(_time)
+
 
         self.scrollDown()
 
-        # Source:
+
+    # Source:
         _box_10 = self.waitElementXPATH(self.xpath_form2_dict.get('Source'))
         logging.info('find Source')
         # _Boxes[10].click()
         logging.info('click Source')
         _box_10.send_keys(self.customer.Source)
         logging.info('write Source')
-        _box_10.send_keys(Keys.TAB)
+        _box_10.send_keys(Keys.ENTER)
         logging.info('write Source TAB')
+        sleep(_time)
 
         self.scrollDown()
         logging.info('scroll down')
 
-        # Destiny:
+    # Destiny:
         _box_11 = self.waitElementXPATH(self.xpath_form2_dict.get('Destiny'))
         logging.info('find Destiny')
         # _Boxes[11].click()
         logging.info('click Destiny')
         _box_11.send_keys(self.customer.Destiny)
         logging.info('write Destiny')
+        sleep(_time)
+
 
         self.scrollDown()
         logging.info('scroll down')
 
-        # USD:
+
+    # USD:
         _box_12 = self.waitElementXPATH(self.xpath_form2_dict.get('USD'))
         logging.info('find USD')
         _Boxes[12].click()
@@ -297,7 +337,7 @@ class BOT(automatic_Browser):
         _box_12.send_keys(self.customer.USD)
         logging.info('write USD')
 
-        input('Finalizar?')
+        print("Proceso Completado")
 
     def getElementScreenshot(self, web_element):
         _web_element = web_element
