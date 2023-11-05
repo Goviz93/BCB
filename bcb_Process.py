@@ -14,7 +14,7 @@ from time import sleep, time
 from PIL import Image
 from bs4 import BeautifulSoup
 from datetime import datetime
-from dataclasses import dataclass
+from customer_dataclass import Customer
 from selenium.webdriver.common.by import By
 from selenium_Browser import automatic_Browser
 from selenium.webdriver.common.keys import Keys
@@ -25,21 +25,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(lineno)d]: %(mess
 logging.getLogger().setLevel(logging.INFO)
 
 
-@dataclass
-class Customer:
-    LastName: str
-    SecondLastName: str
-    Name: str
-    Birthday: str
-    Gender: str
-    phone: str
-    NroDoc: str
-    Address: str
-    email: str
-    USD: str
-    Job: str
-    Source: str
-    Destiny: str
+
 
 
 # Timestamp.
