@@ -10,7 +10,7 @@ import os
 import random
 import re
 import logging
-from time import sleep
+from time import sleep, time
 from PIL import Image
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -126,7 +126,8 @@ class BOT(automatic_Browser):
         self.waitform2()
         self.getToken()
         self.updateXpath_dict()
-        self.Fill_form2()
+        self.fill_form2()
+
 
     def openform1(self):
         self.Bot_Browser.get(self.URLs.get('Form_1'))
@@ -137,6 +138,9 @@ class BOT(automatic_Browser):
         nroDocumento = self.waitElementXPATH(self.xpathDict.get('NroDocumento'))
         nroDocumento.click()
         nroDocumento.send_keys(self.customer.NroDoc)
+        captcha_1 = self.waitElementXPATH(self.xpathDict.get('Captcha_textbox'))
+        captcha_1.click()
+
 
     def waitform2(self):
         self.waitElementXPATH(self.xpathDict.get('waitForm2'))
@@ -149,6 +153,7 @@ class BOT(automatic_Browser):
 
     def updateXpath_dict(self):
         self.xpath_form2_dict = {
+            'boton': ("//i[@class='pi pi-bars']"),
             'LastName': ("//input[@id='persona_frmPrincipal:primerApellido" + str(self.Token[0]) + "']"),
             'SecondLastName': ("//input[@id='persona_frmPrincipal:segundoApellido" + str(self.Token[0]) + "']"),
             'Name': ("//input[@id='persona_frmPrincipal:nombre" + str(self.Token[0]) + "']"),
@@ -160,7 +165,8 @@ class BOT(automatic_Browser):
             'Source': ("//input[@id='persona_frmPrincipal:origen" + str(self.Token[0]) + "']"),
             'Destiny': ("//input[@id='persona_frmPrincipal:destino" + str(self.Token[0]) + "']"),
             'USD': ("//input[@id='persona_frmPrincipal:monto" + str(self.Token[0]) + "_input']"),
-            'Gender': ("//div[@id='persona_frmPrincipal:genero" + str(self.Token[0]) + "']")
+            'Gender': ("//div[@id='persona_frmPrincipal:genero" + str(self.Token[0]) + "']"),
+            'Captcha_2': "//input[@id='persona_frmPrincipal:codigoCaptcha2']"
         }
         self.ids_from2_dict = {
             'Gender_focus': ("persona_frmPrincipal:genero" + str(self.Token[0]) + "_focus"),
@@ -169,56 +175,95 @@ class BOT(automatic_Browser):
             'calendar': {'persona_frmPrincipal:calFecha' + str(self.Token[0])}
         }
 
-    def Fill_form2(self):
-        _Boxes = self.getElements_CLASS("ui-float-label")
+    def fill_form2(self):
+        start_time = time()
+        self.push_button()
+        self.window_maximize()
+        sleep(0.1)
+
+        self.find_boxes()
+
+        _function_list = [
+            self._paterno,
+            self._materno,
+            self._nombre,
+            self._nacimiento,
+            self._genero,
+            self._genero,
+            self._direccion,
+            self._celular,
+            self._email,
+            self._ocupacion,
+            self._origen,
+            self._destino,
+            self._monto,
+            self._captcha_2
+        ]
+
+        #_time = 0.1
+        for fn in _function_list:
+            try:
+                fn()
+            except StaleElementReferenceException as e:
+                self.find_boxes()
+                logging.error(f"Caught a StaleElementReferenceException. Retrying fn ->{fn}")
+                fn()
+            #sleep(_time)
+        end_time = time()
+        total_time = start_time - end_time
+        print(f"Tiempo del form 2 -> {total_time}")
+
+
+
+    def find_boxes(self):
+        self._Boxes = self.getElements_CLASS("ui-float-label")
         logging.info('Boxes found')
 
-        self.scrollDown()
-        logging.info('scrolled down')
-
-
-    # Paterno:
+    def _paterno(self):
         _box_2 = self.waitElementXPATH(self.xpath_form2_dict.get('LastName'))
+        self.focus(_box_2)
         logging.info('find LastName')
-        _Boxes[2].click()
+        self._Boxes[2].click()
         logging.info('click LastName')
         _box_2.send_keys(self.customer.LastName)
         logging.info('write LastName')
 
 
-     # Materno:
+    def _materno(self):
         _box_3 = self.waitElementXPATH(self.xpath_form2_dict.get('SecondLastName'))
+        self.focus(_box_3)
         logging.info('find SecondLastName')
-        _Boxes[3].click()
+        self._Boxes[3].click()
         logging.info('click SecondLastName')
         _box_3.send_keys(self.customer.SecondLastName)
         logging.info('write SecondLastName')
 
 
-     # Nombre:
+    def _nombre(self):
         _box_4 = self.waitElementXPATH(self.xpath_form2_dict.get('Name'))
+        self.focus(_box_4)
         logging.info('find Name')
-        _Boxes[4].click()
+        self._Boxes[4].click()
         logging.info('click Name')
         _box_4.send_keys(self.customer.Name)
         logging.info('write Name')
 
 
-    # Nacimiento:
-        _time = 2
-
-        _Boxes[5].click()
+    def _nacimiento(self):
+        self.focus(self._Boxes[5])
+        self._Boxes[5].click()
         logging.info('click Birthday')
         
         _box5 = self.waitElementXPATH(self.xpath_form2_dict.get('Birthday'))
+        self.focus(_box5)
         logging.info('write Birthday')
 
         _box5.send_keys(Keys.ESCAPE)
-        sleep(0.1)
+        #sleep(0.1)
         _box5.send_keys(Keys.SHIFT + Keys.HOME)
-        sleep(0.1)
+        #sleep(0.1)
         _box5.send_keys(Keys.DELETE)
-        sleep(0.1)
+        #sleep(0.1)
 
         _rawBirthday = self.customer.Birthday.replace('/','')
         logging.info(f'--- Birthday -> {_rawBirthday}')
@@ -227,11 +272,13 @@ class BOT(automatic_Browser):
             logging.info(f'--- Birthday -> {self.keys_dict.get(n)}')
 
 
-    # Genero
+    def _genero(self):
         gender_click = self.waitElementXPATH(self.xpath_form2_dict.get('Gender'))
+        self.focus(gender_click)
         gender_click.click()
-        sleep(0.1)
+        #sleep(0.05)
         gender = self.Bot_Browser.find_element(by=By.ID, value=self.ids_from2_dict.get('Gender_focus'))
+        self.focus(gender)
 
         if 'F' in self.customer.Gender:
             gender.send_keys('F')
@@ -239,105 +286,90 @@ class BOT(automatic_Browser):
             gender.send_keys('M')
         else:
             gender.send_keys('O')
-        sleep(0.2)
+        sleep(0.1)
         gender.send_keys(Keys.ENTER)
-        sleep(_time)
 
 
-
-
-
-        self.scrollDown()
-        logging.info('scroll down')
-
-
-    # Direccion:
-        _box_6 = self.waitElementXPATH(self.xpath_form2_dict.get('Address'))
-        logging.info('find Address')
-        _Boxes[6].click()
+    def _direccion(self):
+        self.focus(self._Boxes[6])
+        self._Boxes[6].click()
         logging.info('click Address')
+        _box_6 = self.waitElementXPATH(self.xpath_form2_dict.get('Address'))
+        self.focus(_box_6)
+        logging.info('find Address')
         _box_6.send_keys(self.customer.Address)
         logging.info('write Address')
-        sleep(_time)
 
 
-    # Celular:
-        _box_7 = self.waitElementXPATH(self.xpath_form2_dict.get('phone'))
-        logging.info('find phone')
-        _Boxes[7].click()
+    def _celular(self):
+        self.focus(self._Boxes[7])
+        self._Boxes[7].click()
         logging.info('click phone')
+        _box_7 = self.waitElementXPATH(self.xpath_form2_dict.get('phone'))
+        self.focus(_box_7)
+        logging.info('find phone')
         _box_7.send_keys(self.customer.phone)
         logging.info('write phone')
-        sleep(_time)
 
-    # email:
-        _box_8 = self.waitElementXPATH(self.xpath_form2_dict.get('email'))
-        logging.info('find email')
-        _Boxes[8].click()
+
+    def _email(self):
+        self.focus(self._Boxes[8])
+        self._Boxes[8].click()
         logging.info('click email')
+        _box_8 = self.waitElementXPATH(self.xpath_form2_dict.get('email'))
+        self.focus(_box_8)
+        logging.info('find email')
         _box_8.send_keys(self.customer.email)
         logging.info('write email')
-        sleep(_time)
 
 
-        self.scrollDown()
-        logging.info('scroll down')
-
-
-    # Job:
+    def _ocupacion(self):
         _box_9 = self.waitElementXPATH(self.xpath_form2_dict.get('Job'))
+        self.focus(_box_9)
         logging.info('find Job')
         _box_9.send_keys(self.customer.Job)
         logging.info('write Job')
-        sleep(0.2)
+        #sleep(0.2)
         self.waitElementXPATH('//li[@data-item-label]')
         options = self.getElements_XPATH('//li[@data-item-label]')
         for o in options:
             if o.accessible_name == self.customer.Job:
                 o.click()
-        sleep(_time)
 
 
-        self.scrollDown()
-
-
-    # Source:
+    def _origen(self):
         _box_10 = self.waitElementXPATH(self.xpath_form2_dict.get('Source'))
+        self.focus(_box_10)
         logging.info('find Source')
-        # _Boxes[10].click()
-        logging.info('click Source')
         _box_10.send_keys(self.customer.Source)
         logging.info('write Source')
-        _box_10.send_keys(Keys.ENTER)
-        logging.info('write Source TAB')
-        sleep(_time)
 
-        self.scrollDown()
-        logging.info('scroll down')
 
-    # Destiny:
+    def _destino(self):
         _box_11 = self.waitElementXPATH(self.xpath_form2_dict.get('Destiny'))
+        self.focus(_box_11)
         logging.info('find Destiny')
-        # _Boxes[11].click()
-        logging.info('click Destiny')
         _box_11.send_keys(self.customer.Destiny)
         logging.info('write Destiny')
-        sleep(_time)
 
 
-        self.scrollDown()
-        logging.info('scroll down')
-
-
-    # USD:
+    def _monto(self):
         _box_12 = self.waitElementXPATH(self.xpath_form2_dict.get('USD'))
+        self.focus(_box_12)
         logging.info('find USD')
-        _Boxes[12].click()
-        logging.info('click USD')
         _box_12.send_keys(self.customer.USD)
         logging.info('write USD')
 
         print("Proceso Completado")
+
+
+    def _captcha_2(self):
+        self.scrollDown()
+        self.scrollDown()
+        _captcha_2 = self.waitElementXPATH(self.xpath_form2_dict.get('Captcha_2'))
+        self.focus(_captcha_2)
+        _captcha_2.click()
+
 
     def getElementScreenshot(self, web_element):
         _web_element = web_element
@@ -345,3 +377,10 @@ class BOT(automatic_Browser):
         _image_stream = io.BytesIO(_image)
         _image_Pil = Image.open(_image_stream)
         _image_Pil.save(_createImageFolder() + '/' + str(_timestamp()) + '.png')
+
+
+    def push_button(self):
+        boton = self.waitElementXPATH(self.xpath_form2_dict.get('boton'))
+        boton.click()
+
+

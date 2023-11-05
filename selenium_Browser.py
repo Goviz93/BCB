@@ -75,19 +75,27 @@ class automatic_Browser():
 
 
     def scrollDown(self):
-        self._increment += 100
+        self._increment += 500
         _scroll = 'window.scrollTo(0,' + str(self._increment) + ')'
         self.Bot_Browser.execute_script(_scroll)
 
 
     def scrollUp(self):
-        self._increment -= 100
+        self._increment -= 300
         if self._increment < 100:
             self._increment = 100
 
         _scroll = 'window.scrollTo(0,' + str(self._increment) + ')'
         self.Bot_Browser.execute_script(_scroll)
 
+    def focus(self, element):
+        self.Bot_Browser.execute_script("arguments[0].focus();",element)
+
+    def window_minimize(self):
+        self.Bot_Browser.minimize_window()
+
+    def window_maximize(self):
+        self.Bot_Browser.maximize_window()
 
     """
         def switch_window(self):
