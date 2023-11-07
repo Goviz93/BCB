@@ -52,7 +52,7 @@ class Excel(spreadSheet):
     def __init__(self, file_path):
         super().__int__(file_path)
 
-    def Read(self, filename='read_file', sheet_name=None):
+    def Read(self, sheet_name=None):
         dataframe = pd.read_excel(self.file_path, sheet_name=sheet_name)
         return dataframe
 
