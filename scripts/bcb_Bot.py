@@ -14,9 +14,9 @@ from time import sleep, time
 from PIL import Image
 from bs4 import BeautifulSoup
 from datetime import datetime
-from customer_dataclass import Customer
+from scripts.customer_dataclass import Customer
 from selenium.webdriver.common.by import By
-from selenium_Browser import automatic_Browser
+from scripts.selenium_Browser import automatic_Browser
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import StaleElementReferenceException
 
@@ -53,7 +53,7 @@ def _randomNumber():
 
 class BOT(automatic_Browser):
 
-    def __init__(self):
+    def __init__(self, customer_object:Customer):
         super().__init__()
 
         self.URLs.update(
@@ -74,7 +74,8 @@ class BOT(automatic_Browser):
         }
 
         self.xpath_form2_dict = dict()
-
+        self.customer = customer_object
+        """
         self.customer = Customer(
             LastName="LUIS",
             SecondLastName="RODRIGUEZ",
@@ -88,8 +89,11 @@ class BOT(automatic_Browser):
             USD="1000",
             Job="ESTUDIANTE UNIVERSITARIA",
             Source="AHORROS",
-            Destiny="AHORROS"
-        )
+            Destiny="AHORROS" 
+            )       
+        """
+
+
         self.Token = None
         self.pattern = "(?<=nroDocumento)(.*)(?=_input)"
         self.keys_dict = {

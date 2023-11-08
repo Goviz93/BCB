@@ -6,14 +6,14 @@ class Customer:
     SecondLastName: str
     Name: str
     Birthday: str
-    Gender: str
-    phone: str
     NroDoc: str
     Address: str
+    phone: str
     email: str
-    USD: str
+    Gender: str
     Job: str
     Source: str
     Destiny: str
+    USD: str
 
 

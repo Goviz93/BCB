@@ -3,6 +3,7 @@ import csv
 import pandas as pd
 from pathlib import Path
 from copy import deepcopy
+from scripts.customer_dataclass import Customer
 
 
 
@@ -115,7 +116,30 @@ class DataFrame_Handler():
 class customers_data():
 
     def __init__(self):
-        pass
+        self.customer_list = list()
+        self.extract_data()
+        self.create_customers()
 
     def extract_data(self):
-        pass
+        reader = DataFrame_Handler().create_sheets(r'clientes.xlsx')
+        Excel_File = reader.Read()
+        self.Excel_sheet = Excel_File.get('Hoja1')
+
+    def create_customers(self):
+        for ind, row in self.Excel_sheet.iterrows():
+            _customer = Customer(LastName=row.get('Apellido_Paterno'),
+                                 SecondLastName=row.get('Apellido_Materno'),
+                                 Name=row.get('Nombre'),
+                                 Birthday=row.get('Fecha_de_Nacimiento'),
+                                 NroDoc=row.get('No_Documento'),
+                                 Address=row.get('Direccion'),
+                                 phone=row.get('Celular'),
+                                 email=row.get('E_Mail'),
+                                 Gender=row.get('Genero'),
+                                 Job=row.get('Ocupacion'),
+                                 Source=row.get('Origen_Fondos'),
+                                 Destiny=row.get('Destino'),
+                                 USD=row.get('Monto')
+                                  )
+            self.customer_list.append(_customer)
+        return self.customer_list
