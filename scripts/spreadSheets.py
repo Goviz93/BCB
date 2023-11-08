@@ -112,4 +112,10 @@ class DataFrame_Handler():
         return dataframe[column_name].str.contains(regex)
 
 
+class customers_data():
 
+    def __init__(self):
+        pass
+
+    def extract_data(self):
+        pass
