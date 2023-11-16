@@ -11,7 +11,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.firefox.options import Options
-from selenium.common import NoSuchElementException, ElementNotInteractableException,StaleElementReferenceException
+from selenium.common import (NoSuchElementException, ElementNotInteractableException,
+                             StaleElementReferenceException, TimeoutException)
 from bs4 import BeautifulSoup
 
 
@@ -54,11 +55,14 @@ class automatic_Browser():
         return _elements
 
     def waitElementXPATH(self, xpath):
-        _waitElement = WebDriverWait(self.Bot_Browser,
-                                     timeout=30,
-                                     poll_frequency=0.2,
-                                     ignored_exceptions=self.errors).until(EC.element_to_be_clickable((By.XPATH, xpath)))
-        return _waitElement
+        try:
+            _waitElement = WebDriverWait(self.Bot_Browser,
+                                         timeout=1,
+                                         poll_frequency=0.2,
+                                         ignored_exceptions=self.errors).until(EC.element_to_be_clickable((By.XPATH, xpath)))
+            return _waitElement
+        except TimeoutException:
+            return None
 
 
     def waitElementObject(self, element):
@@ -79,6 +83,11 @@ class automatic_Browser():
         _scroll = 'window.scrollTo(0,' + str(self._increment) + ')'
         self.Bot_Browser.execute_script(_scroll)
 
+    def scrollDown_form(self, form):
+        self.Bot_Browser.execute_script("arguments[0].scrollTop += 500;", form)
+
+    def scrollUp_form(self, form):
+        self.Bot_Browser.execute_script("arguments[0].scrollTop -= 500;", form)
 
     def scrollUp(self):
         self._increment -= 300
