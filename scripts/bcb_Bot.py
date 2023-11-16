@@ -111,15 +111,20 @@ class BOT(automatic_Browser):
         # self.workFlow()
 
     def workFlow(self):
-        self.openform1()
+        self.fill_form1()
         self.getElementScreenshot(self.getElementXPATH(self.xpathDict.get('Captcha_img')))
-        self.waitform2()
+        self.wait_form2()
         self.getToken()
         self.updateXpath_dict()
         self.fill_form2()
+        while True:
+            self.wait_form3()
+            self.fill_form3()
+            sleep(2)
+            self._captcha_2()
 
 
-    def openform1(self):
+    def fill_form1(self):
         self.Bot_Browser.get(self.URLs.get('Form_1'))
         arrow = self.waitElementXPATH(self.xpathDict.get('Atencion_arrow'))
         arrow.click()
@@ -130,40 +135,6 @@ class BOT(automatic_Browser):
         nroDocumento.send_keys(self.customer.NroDoc)
         captcha_1 = self.waitElementXPATH(self.xpathDict.get('Captcha_textbox'))
         captcha_1.click()
-
-
-    def waitform2(self):
-        self.waitElementXPATH(self.xpathDict.get('waitForm2'))
-
-    def getToken(self):
-        soup = BeautifulSoup(self.Bot_Browser.page_source, 'lxml')
-        _label = soup.find('label', {'id': 'persona_frmPrincipal:j_idt44'})
-        _rawPattern = _label.attrs.get('for')
-        self.Token = re.findall(self.pattern, _rawPattern)
-
-    def updateXpath_dict(self):
-        self.xpath_form2_dict = {
-            'boton': ("//i[@class='pi pi-bars']"),
-            'LastName': ("//input[@id='persona_frmPrincipal:primerApellido" + str(self.Token[0]) + "']"),
-            'SecondLastName': ("//input[@id='persona_frmPrincipal:segundoApellido" + str(self.Token[0]) + "']"),
-            'Name': ("//input[@id='persona_frmPrincipal:nombre" + str(self.Token[0]) + "']"),
-            'Birthday': ("//input[@id='persona_frmPrincipal:calFecha" + str(self.Token[0]) + "_input']"),
-            'Address': ("//input[@id='persona_frmPrincipal:direccion" + str(self.Token[0]) + "']"),
-            'phone': ("//input[@id='persona_frmPrincipal:celular" + str(self.Token[0]) + "_input']"),
-            'email': ("//input[@id='persona_frmPrincipal:correro" + str(self.Token[0]) + "']"),
-            'Job': ("//input[@id='persona_frmPrincipal:rubro2" + str(self.Token[0]) + "_input']"),
-            'Source': ("//input[@id='persona_frmPrincipal:origen" + str(self.Token[0]) + "']"),
-            'Destiny': ("//input[@id='persona_frmPrincipal:destino" + str(self.Token[0]) + "']"),
-            'USD': ("//input[@id='persona_frmPrincipal:monto" + str(self.Token[0]) + "_input']"),
-            'Gender': ("//div[@id='persona_frmPrincipal:genero" + str(self.Token[0]) + "']"),
-            'Captcha_2': "//input[@id='persona_frmPrincipal:codigoCaptcha2']"
-        }
-        self.ids_from2_dict = {
-            'Gender_focus': ("persona_frmPrincipal:genero" + str(self.Token[0]) + "_focus"),
-            'Gender_input': ("persona_frmPrincipal:genero" + str(self.Token[0]) + "_input"),
-            'Gender_label': ("persona_frmPrincipal:genero" + str(self.Token[0]) + "_label"),
-            'calendar': {'persona_frmPrincipal:calFecha' + str(self.Token[0])}
-        }
 
     def fill_form2(self):
         start_time = time()
@@ -190,7 +161,6 @@ class BOT(automatic_Browser):
             self._captcha_2
         ]
 
-        #_time = 0.1
         for fn in _function_list:
             try:
                 fn()
@@ -203,7 +173,52 @@ class BOT(automatic_Browser):
         total_time = start_time - end_time
         print(f"Tiempo del form 2 -> {total_time}")
 
+    def fill_form3(self):
+        sub_form = self.waitElementXPATH("//div[@id='frmConfirmar:dlgConfirmar']")
+        self.scrollDown_form(sub_form)
+        self.push_terms()
+        sleep(3)
+        self.push_registry()
 
+    def wait_form2(self):
+            element = None
+            while element is None:
+                element = self.waitElementXPATH(self.xpathDict.get('waitForm2'))
+
+    def wait_form3(self):
+        element = None
+        while element is None:
+            element = self.waitElementXPATH("//div[@id='frmConfirmar:dlgConfirmar']//span[@class='ui-icon ui-icon-extlink']")
+
+    def getToken(self):
+            soup = BeautifulSoup(self.Bot_Browser.page_source, 'lxml')
+            _label = soup.find('label', {'id': 'persona_frmPrincipal:j_idt44'})
+            _rawPattern = _label.attrs.get('for')
+            self.Token = re.findall(self.pattern, _rawPattern)
+
+    def updateXpath_dict(self):
+            self.xpath_form2_dict = {
+                'boton': ("//i[@class='pi pi-bars']"),
+                'LastName': ("//input[@id='persona_frmPrincipal:primerApellido" + str(self.Token[0]) + "']"),
+                'SecondLastName': ("//input[@id='persona_frmPrincipal:segundoApellido" + str(self.Token[0]) + "']"),
+                'Name': ("//input[@id='persona_frmPrincipal:nombre" + str(self.Token[0]) + "']"),
+                'Birthday': ("//input[@id='persona_frmPrincipal:calFecha" + str(self.Token[0]) + "_input']"),
+                'Address': ("//input[@id='persona_frmPrincipal:direccion" + str(self.Token[0]) + "']"),
+                'phone': ("//input[@id='persona_frmPrincipal:celular" + str(self.Token[0]) + "_input']"),
+                'email': ("//input[@id='persona_frmPrincipal:correro" + str(self.Token[0]) + "']"),
+                'Job': ("//input[@id='persona_frmPrincipal:rubro2" + str(self.Token[0]) + "_input']"),
+                'Source': ("//input[@id='persona_frmPrincipal:origen" + str(self.Token[0]) + "']"),
+                'Destiny': ("//input[@id='persona_frmPrincipal:destino" + str(self.Token[0]) + "']"),
+                'USD': ("//input[@id='persona_frmPrincipal:monto" + str(self.Token[0]) + "_input']"),
+                'Gender': ("//div[@id='persona_frmPrincipal:genero" + str(self.Token[0]) + "']"),
+                'Captcha_2': "//input[@id='persona_frmPrincipal:codigoCaptcha2']"
+            }
+            self.ids_from2_dict = {
+                'Gender_focus': ("persona_frmPrincipal:genero" + str(self.Token[0]) + "_focus"),
+                'Gender_input': ("persona_frmPrincipal:genero" + str(self.Token[0]) + "_input"),
+                'Gender_label': ("persona_frmPrincipal:genero" + str(self.Token[0]) + "_label"),
+                'calendar': {'persona_frmPrincipal:calFecha' + str(self.Token[0])}
+            }
 
     def find_boxes(self):
         self._Boxes = self.getElements_CLASS("ui-float-label")
@@ -373,4 +388,10 @@ class BOT(automatic_Browser):
         boton = self.waitElementXPATH(self.xpath_form2_dict.get('boton'))
         boton.click()
 
+    def push_terms(self):
+        boton = self.waitElementXPATH("//div[@class='ui-chkbox-box ui-widget ui-corner-all ui-state-default']")
+        boton.click()
 
+    def push_registry(self):
+        boton = self.waitElementXPATH("//span[normalize-space()='Registrar']")
+        boton.click()
