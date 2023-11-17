@@ -10,6 +10,7 @@ import os
 import random
 import re
 import logging
+from bcb_Process import logger
 from time import sleep, time
 from PIL import Image
 from bs4 import BeautifulSoup
@@ -20,12 +21,10 @@ from scripts.selenium_Browser import automatic_Browser
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import StaleElementReferenceException
 
-
+"""
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(lineno)d]: %(message)s')
 logging.getLogger().setLevel(logging.INFO)
-
-
-
+"""
 
 
 # Timestamp.
@@ -75,6 +74,7 @@ class BOT(automatic_Browser):
 
         self.xpath_form2_dict = dict()
         self.customer = customer_object
+        logger.info(f"Customer Information -> {self.customer}")
         """
         self.customer = Customer(
             LastName="LUIS",
@@ -135,12 +135,13 @@ class BOT(automatic_Browser):
         nroDocumento.send_keys(self.customer.NroDoc)
         captcha_1 = self.waitElementXPATH(self.xpathDict.get('Captcha_textbox'))
         captcha_1.click()
+        logger.info(f"Form 1 completed - Waiting for captcha")
 
     def fill_form2(self):
         start_time = time()
         self.push_button()
         self.window_maximize()
-        sleep(0.1)
+        sleep(0.08)
 
         self.find_boxes()
 
@@ -149,7 +150,6 @@ class BOT(automatic_Browser):
             self._materno,
             self._nombre,
             self._nacimiento,
-            self._genero,
             self._genero,
             self._direccion,
             self._celular,
@@ -177,91 +177,98 @@ class BOT(automatic_Browser):
         sub_form = self.waitElementXPATH("//div[@id='frmConfirmar:dlgConfirmar']")
         self.scrollDown_form(sub_form)
         self.push_terms()
-        sleep(3)
+        sleep(0.5)
         self.push_registry()
 
     def wait_form2(self):
             element = None
             while element is None:
                 element = self.waitElementXPATH(self.xpathDict.get('waitForm2'))
+            logger.info(f"Form 2 found and ready to be filled")
 
     def wait_form3(self):
         element = None
         while element is None:
             element = self.waitElementXPATH("//div[@id='frmConfirmar:dlgConfirmar']//span[@class='ui-icon ui-icon-extlink']")
+        logger.info(f"Form 3 found and ready to be filled")
 
     def getToken(self):
-            soup = BeautifulSoup(self.Bot_Browser.page_source, 'lxml')
-            _label = soup.find('label', {'id': 'persona_frmPrincipal:j_idt44'})
-            _rawPattern = _label.attrs.get('for')
-            self.Token = re.findall(self.pattern, _rawPattern)
+        soup = BeautifulSoup(self.Bot_Browser.page_source, 'lxml')
+        _label = soup.find('label', {'id': 'persona_frmPrincipal:j_idt44'})
+        _rawPattern = _label.attrs.get('for')
+        self.Token = re.findall(self.pattern, _rawPattern)
+        logger.info(f"Token extracted -> {self.Token}")
 
     def updateXpath_dict(self):
-            self.xpath_form2_dict = {
-                'boton': ("//i[@class='pi pi-bars']"),
-                'LastName': ("//input[@id='persona_frmPrincipal:primerApellido" + str(self.Token[0]) + "']"),
-                'SecondLastName': ("//input[@id='persona_frmPrincipal:segundoApellido" + str(self.Token[0]) + "']"),
-                'Name': ("//input[@id='persona_frmPrincipal:nombre" + str(self.Token[0]) + "']"),
-                'Birthday': ("//input[@id='persona_frmPrincipal:calFecha" + str(self.Token[0]) + "_input']"),
-                'Address': ("//input[@id='persona_frmPrincipal:direccion" + str(self.Token[0]) + "']"),
-                'phone': ("//input[@id='persona_frmPrincipal:celular" + str(self.Token[0]) + "_input']"),
-                'email': ("//input[@id='persona_frmPrincipal:correro" + str(self.Token[0]) + "']"),
-                'Job': ("//input[@id='persona_frmPrincipal:rubro2" + str(self.Token[0]) + "_input']"),
-                'Source': ("//input[@id='persona_frmPrincipal:origen" + str(self.Token[0]) + "']"),
-                'Destiny': ("//input[@id='persona_frmPrincipal:destino" + str(self.Token[0]) + "']"),
-                'USD': ("//input[@id='persona_frmPrincipal:monto" + str(self.Token[0]) + "_input']"),
-                'Gender': ("//div[@id='persona_frmPrincipal:genero" + str(self.Token[0]) + "']"),
-                'Captcha_2': "//input[@id='persona_frmPrincipal:codigoCaptcha2']"
-            }
-            self.ids_from2_dict = {
-                'Gender_focus': ("persona_frmPrincipal:genero" + str(self.Token[0]) + "_focus"),
-                'Gender_input': ("persona_frmPrincipal:genero" + str(self.Token[0]) + "_input"),
-                'Gender_label': ("persona_frmPrincipal:genero" + str(self.Token[0]) + "_label"),
-                'calendar': {'persona_frmPrincipal:calFecha' + str(self.Token[0])}
-            }
+        self.xpath_form2_dict = {
+            'boton': ("//i[@class='pi pi-bars']"),
+            'LastName': ("//input[@id='persona_frmPrincipal:primerApellido" + str(self.Token[0]) + "']"),
+            'SecondLastName': ("//input[@id='persona_frmPrincipal:segundoApellido" + str(self.Token[0]) + "']"),
+            'Name': ("//input[@id='persona_frmPrincipal:nombre" + str(self.Token[0]) + "']"),
+            'Birthday': ("//input[@id='persona_frmPrincipal:calFecha" + str(self.Token[0]) + "_input']"),
+            'Address': ("//input[@id='persona_frmPrincipal:direccion" + str(self.Token[0]) + "']"),
+            'phone': ("//input[@id='persona_frmPrincipal:celular" + str(self.Token[0]) + "_input']"),
+            'email': ("//input[@id='persona_frmPrincipal:correro" + str(self.Token[0]) + "']"),
+            'Job': ("//input[@id='persona_frmPrincipal:rubro2" + str(self.Token[0]) + "_input']"),
+            'Source': ("//input[@id='persona_frmPrincipal:origen" + str(self.Token[0]) + "']"),
+            'Destiny': ("//input[@id='persona_frmPrincipal:destino" + str(self.Token[0]) + "']"),
+            'USD': ("//input[@id='persona_frmPrincipal:monto" + str(self.Token[0]) + "_input']"),
+            'Gender': ("//div[@id='persona_frmPrincipal:genero" + str(self.Token[0]) + "']"),
+            'Captcha_2': "//input[@id='persona_frmPrincipal:codigoCaptcha2']"
+        }
+        self.ids_from2_dict = {
+            'Gender_focus': ("persona_frmPrincipal:genero" + str(self.Token[0]) + "_focus"),
+            'Gender_input': ("persona_frmPrincipal:genero" + str(self.Token[0]) + "_input"),
+            'Gender_label': ("persona_frmPrincipal:genero" + str(self.Token[0]) + "_label"),
+            'calendar': {'persona_frmPrincipal:calFecha' + str(self.Token[0])}
+        }
+        logger.info(f"XPATH Dictionary updated with form 2 xpaths")
+
 
     def find_boxes(self):
         self._Boxes = self.getElements_CLASS("ui-float-label")
-        logging.info('Boxes found')
+        logger.info('def find_boxes -> Boxes found')
 
     def _paterno(self):
         _box_2 = self.waitElementXPATH(self.xpath_form2_dict.get('LastName'))
         self.focus(_box_2)
-        logging.info('find LastName')
-        self._Boxes[2].click()
-        logging.info('click LastName')
+        logger.info('def _paterno -> Focus on LastName')
+        #self._Boxes[2].click()
+        #logging.info('click LastName')
         _box_2.send_keys(self.customer.LastName)
-        logging.info('write LastName')
+        logger.info(f'def _paterno -> Wrote LastName -> {self.customer.LastName}')
+
 
 
     def _materno(self):
         _box_3 = self.waitElementXPATH(self.xpath_form2_dict.get('SecondLastName'))
         self.focus(_box_3)
-        logging.info('find SecondLastName')
-        self._Boxes[3].click()
-        logging.info('click SecondLastName')
+        logger.info('def _materno -> Focus on SecondLastName')
+        #self._Boxes[3].click()
+        #logging.info('click SecondLastName')
         _box_3.send_keys(self.customer.SecondLastName)
-        logging.info('write SecondLastName')
+        logger.info(f'def _materno -> Wrote SecondLastName -> {self.customer.SecondLastName}')
 
 
     def _nombre(self):
         _box_4 = self.waitElementXPATH(self.xpath_form2_dict.get('Name'))
         self.focus(_box_4)
-        logging.info('find Name')
-        self._Boxes[4].click()
-        logging.info('click Name')
+        logger.info('def _nombre -> Focus on Name')
+        #self._Boxes[4].click()
+        #logging.info('click Name')
         _box_4.send_keys(self.customer.Name)
-        logging.info('write Name')
+        logger.info(f'def _nombre -> Wrote Name -> {self.customer.Name}')
 
 
     def _nacimiento(self):
         self.focus(self._Boxes[5])
         self._Boxes[5].click()
-        logging.info('click Birthday')
-        
+        logger.info('def _nacimiento -> Click on Birthday')
+
         _box5 = self.waitElementXPATH(self.xpath_form2_dict.get('Birthday'))
         self.focus(_box5)
-        logging.info('write Birthday')
+        logger.info('def _nacimiento -> Focus on Birthday')
+
 
         _box5.send_keys(Keys.ESCAPE)
         #sleep(0.1)
@@ -269,101 +276,108 @@ class BOT(automatic_Browser):
         #sleep(0.1)
         _box5.send_keys(Keys.DELETE)
         #sleep(0.1)
+        logger.info('def _nacimiento -> Cleared default data from Birthday')
 
         _rawBirthday = self.customer.Birthday.replace('/','')
-        logging.info(f'--- Birthday -> {_rawBirthday}')
+
         for n in list(_rawBirthday):
             _box5.send_keys(self.keys_dict.get(n))
             logging.info(f'--- Birthday -> {self.keys_dict.get(n)}')
-
+        logger.info('def _nacimiento -> Birthday Wrote')
 
     def _genero(self):
         gender_click = self.waitElementXPATH(self.xpath_form2_dict.get('Gender'))
         self.focus(gender_click)
-        gender_click.click()
-        #sleep(0.05)
+        logger.info('def _genero -> Focus on gender_click')
+        #gender_click.click()
         gender = self.Bot_Browser.find_element(by=By.ID, value=self.ids_from2_dict.get('Gender_focus'))
         self.focus(gender)
-
+        logger.info('def _genero -> Focus on gender')
         if 'F' in self.customer.Gender:
             gender.send_keys('F')
         elif 'M' in self.customer.Gender:
             gender.send_keys('M')
         else:
             gender.send_keys('O')
-        sleep(0.1)
+        logger.info(f'def _genero -> Wrote {self.customer.Gender}')
+        sleep(0.7)
         gender.send_keys(Keys.ENTER)
+
 
 
     def _direccion(self):
         self.focus(self._Boxes[6])
-        self._Boxes[6].click()
-        logging.info('click Address')
+        logger.info('def _direccion -> Focus on self._Boxes[6]')
+        #self._Boxes[6].click()
         _box_6 = self.waitElementXPATH(self.xpath_form2_dict.get('Address'))
         self.focus(_box_6)
-        logging.info('find Address')
+        logger.info('def _direccion -> Focus on _box_6')
         _box_6.send_keys(self.customer.Address)
-        logging.info('write Address')
+        logger.info(f'def _direccion -> Wrote {self.customer.Address}')
 
 
     def _celular(self):
         self.focus(self._Boxes[7])
-        self._Boxes[7].click()
-        logging.info('click phone')
+        logger.info('def _celular -> Focus on self._Boxes[7]')
+        #self._Boxes[7].click()
+        #logging.info('click phone')
         _box_7 = self.waitElementXPATH(self.xpath_form2_dict.get('phone'))
         self.focus(_box_7)
-        logging.info('find phone')
+        logger.info('def _celular -> Focus on _box_7')
         _box_7.send_keys(self.customer.phone)
-        logging.info('write phone')
+        logger.info(f'def _celular -> Wrote {self.customer.phone}')
 
 
     def _email(self):
         self.focus(self._Boxes[8])
-        self._Boxes[8].click()
-        logging.info('click email')
+        logger.info('def _email -> Focus on self._Boxes[8]')
+        #self._Boxes[8].click()
+        #logging.info('click email')
         _box_8 = self.waitElementXPATH(self.xpath_form2_dict.get('email'))
         self.focus(_box_8)
+        logger.info('def _email -> Focus on _box_8')
         logging.info('find email')
         _box_8.send_keys(self.customer.email)
-        logging.info('write email')
+        logger.info(f'def _email -> Wrote {self.customer.email}')
 
 
     def _ocupacion(self):
         _box_9 = self.waitElementXPATH(self.xpath_form2_dict.get('Job'))
         self.focus(_box_9)
-        logging.info('find Job')
+        logger.info('def _ocupacion -> Focus on self._Boxes[9]')
         _box_9.send_keys(self.customer.Job)
         logging.info('write Job')
-        #sleep(0.2)
+        logger.info(f'def _ocupacion -> Wrote {self.customer.Job}')
         self.waitElementXPATH('//li[@data-item-label]')
         options = self.getElements_XPATH('//li[@data-item-label]')
         for o in options:
             if o.accessible_name == self.customer.Job:
                 o.click()
+        logger.info(f'def _ocupacion -> Selected Option')
 
 
     def _origen(self):
         _box_10 = self.waitElementXPATH(self.xpath_form2_dict.get('Source'))
         self.focus(_box_10)
-        logging.info('find Source')
+        logger.info('def _origen -> Focus on _box_10')
         _box_10.send_keys(self.customer.Source)
-        logging.info('write Source')
+        logger.info(f'def _origen -> Wrote {self.customer.Source}')
 
 
     def _destino(self):
         _box_11 = self.waitElementXPATH(self.xpath_form2_dict.get('Destiny'))
         self.focus(_box_11)
-        logging.info('find Destiny')
+        logger.info('def _destino -> Focus on _box_11')
         _box_11.send_keys(self.customer.Destiny)
-        logging.info('write Destiny')
+        logger.info(f'def _destino -> Wrote {self.customer.Destiny}')
 
 
     def _monto(self):
         _box_12 = self.waitElementXPATH(self.xpath_form2_dict.get('USD'))
         self.focus(_box_12)
-        logging.info('find USD')
+        logger.info('def _monto -> Focus on _box_12')
         _box_12.send_keys(self.customer.USD)
-        logging.info('write USD')
+        logger.info(f'def _monto -> Wrote {self.customer.USD}')
 
         print("Proceso Completado")
 
@@ -382,6 +396,7 @@ class BOT(automatic_Browser):
         _image_stream = io.BytesIO(_image)
         _image_Pil = Image.open(_image_stream)
         _image_Pil.save(_createImageFolder() + '/' + str(_timestamp()) + '.png')
+        logger.info(f"Captcha saved")
 
 
     def push_button(self):

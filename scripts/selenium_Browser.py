@@ -5,7 +5,8 @@
     Customer:
 
 """
-
+import logging
+from bcb_Process import logger
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -14,6 +15,8 @@ from selenium.webdriver.firefox.options import Options
 from selenium.common import (NoSuchElementException, ElementNotInteractableException,
                              StaleElementReferenceException, TimeoutException)
 from bs4 import BeautifulSoup
+
+#logger = logging.getLogger(__name__)
 
 
 class automatic_Browser():
@@ -29,16 +32,19 @@ class automatic_Browser():
         options.page_load_strategy = 'normal'
         self.Bot_Browser = webdriver.Firefox(options=options)
         self.Bot_Browser.implicitly_wait(1.3)
-        print(f"---- W E B  B R O W S E R   E N A B L E D ---- ")
+        #print(f"---- W E B  B R O W S E R   E N A B L E D ---- ")
+        logger.info(f"Web browser enabled")
 
 
     def CloseBrowser(self):
         self.Bot_Browser.quit()
-        print("The Browser is closed")
+        logger.info(f"The Browser is closed")
+        #print("The Browser is closed")
 
 
     def refresh(self):
         self.Bot_Browser.refresh()
+        logger.info(f"Refresh browser")
 
 
     def getElementXPATH(self, xpath):
